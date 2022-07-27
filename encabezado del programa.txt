@@ -1,0 +1,289 @@
+ */
+package test_reclutamiento_amoreno;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.PreparedStatement;
+import javax.swing.JOptionPane;
+import javax.swing.ButtonGroup;
+import javax.swing.table.DefaultTableModel;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+
+public class test_Reclutamiento_Amoreno1 extends javax.swing.JFrame {
+
+    ButtonGroup btnGr; //se crear grupo de botones para controlar radio boton
+
+    public test_Reclutamiento_Amoreno1() {
+        initComponents();
+        txtid.setVisible(false);
+        btnGr = new ButtonGroup();
+        btnGr.add(rbmasculino);
+        btnGr.add(rbfemenino);
+    }
+//=================================================================
+//botton gurgar
+
+      Integer aspirante = Integer.parseInt(txtaspirante.getText());
+        String nombre = txtnombre.getText();
+        String apellido = txtapellido.getText();
+        String cedula;
+        Integer edad = Integer.parseInt(txtedad.getText());
+        String fecha = txtfecha.getText();
+        String sexo;
+
+        if (rbmasculino.isSelected() == true) {
+            sexo = "Masculino";
+        } else if (rbfemenino.isSelected() == true) {
+            sexo = "Femenino";
+        } else {
+            sexo = "Otro";
+        }
+        
+        if (txtcedula.getText().equals("")){
+            
+            cedula = "8-8888-8888";
+        }else{
+            
+            cedula = txtcedula.getText();
+        }
+
+        try {
+
+            Connection con = conexion.getConexion();
+            PreparedStatement pr = con.prepareStatement("INSERT INTO clientes(id_aspirante,nombre,apellido,cedula,edad,fecha de nacimiento,\n"
+                    + "  sexo,estatus) value (?,?,?,?,?,?,?,?)");
+            pr.setInt(1, aspirante);
+            pr.setString(2, nombre);
+            pr.setString(3, apellido);
+            pr.setString(4, cedula);
+            pr.setInt(5, edad);
+            pr.setString(6, fecha);
+            pr.setString(7, sexo);
+            pr.setInt(8, 1);
+            pr.executeUpdate();
+
+            JOptionPane.showMessageDialog(null, "Datos Guardado Exitosamente");
+            limpiar();
+            cargarTabla();
+
+        } catch (SQLException e) {
+
+            JOptionPane.showMessageDialog(null, toString());
+        }
+
+//=============================================================================================
+//boton modificar
+//=============================================================================================
+ int id = Integer.parseInt(txtid.getText());
+        Integer aspirante = Integer.parseInt(txtaspirante.getText());
+        String nombre = txtnombre.getText();
+        String apellido = txtapellido.getText();
+        String cedula = txtcedula.getText();
+        Integer edad = Integer.parseInt(txtedad.getText());
+        String fecha = txtfecha.getText();
+        String sexo;
+
+       
+        if (rbmasculino.isSelected() == true) {
+            sexo = "Masculino";
+        } else if (rbfemenino.isSelected() == true) {
+            sexo = "Femenino";
+        } else {
+            sexo = "Otro";
+        }
+
+        try {
+
+            Connection con = conexion.getConexion();
+            PreparedStatement pr = con.prepareStatement("UPDATE Clientes SETid_aspirante= ?,nombre =?,apellido=?,cedula=?,edad=?,fecha de nacimiento=?,\n" +
+"  sexo=? WHERE ID = ? ");
+            pr.setInt(1, aspirante);
+            pr.setString(2, nombre);
+            pr.setString(3, apellido);
+            pr.setString(4, cedula);
+            pr.setInt(5, edad);
+            pr.setString(6, fecha);
+            pr.setString(7, sexo);
+            pr.setInt(8, id);
+            pr.executeUpdate();
+
+            JOptionPane.showMessageDialog(null, "Datos Modoificado Exitosamente");
+            limpiar();
+            cargarTabla();
+
+        } catch (SQLException e) {
+
+            JOptionPane.showMessageDialog(null, toString());
+        }
+    }  
+
+//================================================================
+//boton eliminar
+//================================================================
+       int id = Integer.parseInt(txtid.getText());
+    
+
+        try {
+
+            Connection con = conexion.getConexion();
+            PreparedStatement pr = con.prepareStatement("UPDATE Clientes SET estatus = 0 WHERE ID = ? ");
+            pr.setInt(1, id);
+            pr.executeUpdate();
+
+            JOptionPane.showMessageDialog(null, "Datos Eliminado Exitosamente");
+            limpiar();
+            cargarTabla();
+
+        } catch (SQLException e) {
+
+            JOptionPane.showMessageDialog(null, toString());
+        }
+    } 
+//==========================================================
+// registro de cliente en la tabla
+//=========================================================
+ try {
+            int fila = tblregistro.getSelectedRow();
+            int Id = Integer.parseInt(tblregistro.getValueAt(fila, 0).toString());
+            PreparedStatement pr;
+            ResultSet rs;
+            
+            Connection con = conexion.getConexion();
+            pr= con.prepareStatement("SELECT id ,id_aspirante,nombre,apellido,cedula,edad,fecha de nacimiento,sexo,estatus FROM clientes WHERE ID =?");
+            rs = pr.executeQuery();
+            
+            while (rs.next()){
+                txtid.setText(String.valueOf(Id));
+                txtaspirante.setText(rs.getString("aspirante"));
+                txtnombre.setText(rs.getString("nombre"));
+                txtapellido.setText(rs.getString("apellido"));
+                txtcedula.setText(rs.getString("cedula"));
+                txtedad.setText(rs.getString("edad"));
+                txtfecha.setText(rs.getString("fecha"));
+                if (rs.getString("sexo").equals("Masculino")){
+                    rbmasculino.setSelected(true);
+                }else if (rs.getString("sexo").equals("Femenino")){
+                    rbfemenino.setSelected(true);
+                }
+                
+            }
+            
+        } catch (SQLException e) {
+            
+            JOptionPane.showMessageDialog(null, toString());
+        }
+        
+        
+        
+    } 
+//=========================================================
+//metodo limpiar
+//=========================================================
+ private void limpiar(){
+        txtid.setText("");
+        txtnombre.setText("");
+        txtapellido.setText("");
+        txtaspirante.setText("");
+        txtcedula.setText("");
+        txtedad.setText("");
+        txtfecha.setText("");
+        btnGr.clearSelection();
+        
+    }
+//========================================================
+//metodo cargar
+//========================================================
+  
+        DefaultTableModel modelTabla = (DefaultTableModel) tblregistro.getModel();
+        modelTabla.setRowCount(0);
+        
+        PreparedStatement pr;
+        ResultSet rs;
+        ResultSetMetaData rsmd;
+        int columnas;
+        
+        try {
+            Connection con = conexion.getConexion();
+            pr= con.prepareStatement("SELECT id ,id_aspirante,nombre,apellido,cedula,edad,fecha de nacimiento,sexo,estatus FROM clientes Where estatus = 1");
+            rs = pr.executeQuery();
+            rsmd = rs.getMetaData();
+            columnas = rsmd.getColumnCount();
+            
+            while (rs.next()) {
+                Object [] fila = new Object[columnas];
+                for (int indice=0; indice < columnas; indice++){
+                    fila[indice] = rs.getObject(indice + 1);
+                }
+                modelTabla.addRow(fila);
+            }
+            
+        } catch (SQLException e) {
+            
+            JOptionPane.showMessageDialog(null, toString());
+        }
+    }
+
+//main
+==============================================================
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(test_Reclutamiento_Amoreno1.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(test_Reclutamiento_Amoreno1.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(test_Reclutamiento_Amoreno1.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(test_Reclutamiento_Amoreno1.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new test_Reclutamiento_Amoreno1().setVisible(true);
+            }
+        });
+    }
+==========================================================================
+la clase de conexion
+=========================================================================
+package test_reclutamiento_amoreno;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+
+public class conexion {
+    
+    public static Connection getConexion(){
+        
+        String url = "jdbc:sqlserver://localhost:1433;"
+                + "database=RegostrpDeClientes"
+                + "user=sa"
+                + "password=1234";
+        
+        try {
+            
+            Connection con = DriverManager.getConnection(url);
+            return con;
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+            return null;
+        }
+                
+    }
+}
